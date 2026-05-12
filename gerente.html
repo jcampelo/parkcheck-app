@@ -14,13 +14,9 @@
     --accent:  oklch(58% 0.18 255);
     --accent-muted: oklch(58% 0.18 255 / 0.12);
     --success: oklch(62% 0.16 150);
-    --success-bg: oklch(62% 0.16 150 / 0.10);
-    --pending: oklch(62% 0.14 80);
-    --pending-bg: oklch(80% 0.14 80 / 0.16);
     --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
     --font-body:    -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
     --radius-sm: 10px;
-    --radius-md: 16px;
     --radius-full: 9999px;
   }
 
@@ -33,6 +29,7 @@
     display: flex; justify-content: center; align-items: center;
     min-height: 100dvh;
     -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
   }
 
   #app {
@@ -45,6 +42,7 @@
   }
   @media (min-width: 500px) { #app { border-radius: 32px; height: min(100dvh - 40px, 900px); } }
 
+  /* header */
   .app-header {
     padding: 18px 20px;
     display: flex; align-items: center; justify-content: space-between;
@@ -56,7 +54,6 @@
     font-size: 22px; font-weight: 600; letter-spacing: -0.02em;
   }
   .app-logo span { color: var(--accent); }
-
   .header-actions { display: flex; align-items: center; gap: 8px; }
 
   .icon-btn {
@@ -64,8 +61,11 @@
     border: 1px solid var(--border); background: var(--surface);
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; color: var(--muted); transition: all 0.15s ease;
+    touch-action: manipulation;
   }
+  .icon-btn:hover { color: var(--fg); }
   .icon-btn:active { transform: scale(0.94); background: var(--border); }
+  .icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .icon-btn svg { transition: transform 0.4s ease; }
   .refresh-btn:active svg { transform: rotate(180deg); }
 
@@ -76,12 +76,39 @@
     font-family: var(--font-display);
   }
 
-  .main-content {
-    flex: 1; overflow-y: auto; padding: 20px;
-    display: flex; flex-direction: column;
-    -webkit-overflow-scrolling: touch;
+  /* panels */
+  .panels { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+  .panel {
+    display: none; flex: 1; overflow-y: auto; padding: 20px;
+    flex-direction: column; -webkit-overflow-scrolling: touch;
   }
+  .panel.active { display: flex; }
 
+  /* bottom nav */
+  .bottom-nav {
+    display: flex; flex-shrink: 0;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .nav-btn {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 3px; padding: 10px 0; min-height: 56px;
+    border: none; background: none;
+    cursor: pointer; color: var(--muted);
+    font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    touch-action: manipulation;
+    transition: color 0.15s ease;
+    font-family: var(--font-body);
+  }
+  .nav-btn.active { color: var(--accent); }
+  .nav-btn:hover { color: var(--fg); }
+  .nav-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  /* stats */
   .stats-row {
     display: grid; grid-template-columns: 1fr 1fr;
     gap: 10px; margin-bottom: 6px;
@@ -104,8 +131,7 @@
   .rate-summary {
     display: flex; align-items: center; justify-content: center; gap: 12px;
     margin-bottom: 18px; padding: 10px 0;
-    font-size: 12px; color: var(--muted);
-    font-variant-numeric: tabular-nums;
+    font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums;
   }
   .rate-summary strong { color: var(--fg); font-weight: 500; }
 
@@ -115,19 +141,17 @@
     margin-bottom: 10px;
     display: flex; align-items: center; gap: 8px;
   }
-  .section-title::after {
-    content: ''; flex: 1; height: 1px; background: var(--border);
-  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
+  /* vehicle cards */
   .vehicle-list { display: flex; flex-direction: column; gap: 10px; }
   .vehicle-card {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius-sm); padding: 16px;
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    transition: all 0.15s ease;
+    transition: border-color 0.15s ease;
   }
   .vehicle-card:hover { border-color: var(--muted); }
-
   .vehicle-info { flex: 1; min-width: 0; }
   .vehicle-plate {
     font-family: var(--font-display); font-size: 19px; font-weight: 600;
@@ -142,10 +166,7 @@
     background: var(--success); flex-shrink: 0;
     animation: pulse 2s ease-in-out infinite;
   }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.35; }
-  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
   .vehicle-time { text-align: right; flex-shrink: 0; }
   .vehicle-duration {
     font-size: 20px; font-weight: 500;
@@ -153,12 +174,9 @@
   }
   .vehicle-cost {
     font-size: 12px; color: var(--accent); font-weight: 500;
-    font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
-    margin-top: 2px;
+    font-variant-numeric: tabular-nums; margin-top: 2px;
   }
-  .vehicle-entry {
-    font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums;
-  }
+  .vehicle-entry { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
 
   .btn-small {
     padding: 10px 20px; font-size: 13px; font-weight: 500;
@@ -166,104 +184,38 @@
     border: 1px solid var(--fg); background: var(--fg);
     color: var(--surface); cursor: pointer;
     transition: all 0.15s ease; white-space: nowrap;
-    font-family: var(--font-body);
+    font-family: var(--font-body); touch-action: manipulation;
   }
   .btn-small:active { transform: scale(0.97); opacity: 0.85; }
+  .btn-small:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   .empty-state {
     flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 10px; color: var(--muted); text-align: center; padding: 48px 20px;
   }
   .empty-icon { font-size: 44px; opacity: 0.3; line-height: 1; }
-  .empty-state h3 { font-family: var(--font-display); font-size: 17px; font-weight: 500; color: var(--fg); }
+  .empty-state h3 { font-family: var(--font-display); font-size: 17px; font-weight: 500; color: var(--fg); text-wrap: balance; }
   .empty-state p { font-size: 14px; max-width: 260px; }
 
-  .history-section { margin-top: 28px; }
+  /* history */
   .history-list { display: flex; flex-direction: column; gap: 8px; }
   .history-row {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius-sm); padding: 12px 16px;
-    display: flex; align-items: center; justify-content: space-between;
-    font-size: 14px;
+    display: flex; align-items: center; justify-content: space-between; font-size: 14px;
   }
   .history-row .h-plate {
     font-family: var(--font-display); font-weight: 600;
     letter-spacing: 0.06em; font-size: 16px;
   }
-  .history-row .h-amount {
-    font-weight: 600; color: var(--success);
-    font-variant-numeric: tabular-nums;
-  }
+  .history-row .h-amount { font-weight: 600; color: var(--success); font-variant-numeric: tabular-nums; }
   .history-row .h-time { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 
-  .modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.35);
-    display: flex; align-items: flex-end; justify-content: center;
-    z-index: 100;
-    animation: fadeIn 0.2s ease;
-  }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-  .modal-sheet {
-    background: var(--surface); border-radius: 22px 22px 0 0;
-    width: 100%; max-width: 430px; max-height: 88vh;
-    overflow-y: auto; padding: 20px 20px 34px;
-    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 0 0 1px var(--border);
-  }
-  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
-  .modal-handle {
-    width: 36px; height: 5px;
-    border-radius: var(--radius-full); background: var(--border);
-    margin: 0 auto 20px;
-  }
-  .modal-sheet h3 {
+  /* config panel */
+  .config-title {
     font-family: var(--font-display); font-size: 20px; font-weight: 600;
-    letter-spacing: -0.02em; margin-bottom: 20px;
+    letter-spacing: -0.02em; margin-bottom: 20px; text-wrap: balance;
   }
-  .checkout-details { display: flex; flex-direction: column; gap: 14px; margin-bottom: 22px; }
-  .checkout-row { display: flex; justify-content: space-between; align-items: center; }
-  .checkout-row .clabel { font-size: 15px; color: var(--muted); }
-  .checkout-row .cvalue { font-size: 16px; font-weight: 500; font-variant-numeric: tabular-nums; }
-  .checkout-total {
-    border-top: 1px solid var(--border); padding-top: 16px; margin-top: 6px;
-  }
-  .checkout-total .clabel { font-size: 17px; font-weight: 500; color: var(--fg); }
-  .checkout-total .cvalue {
-    font-size: 28px; font-weight: 600; font-family: var(--font-display);
-    letter-spacing: -0.02em;
-  }
-  .checkout-breakdown {
-    background: var(--bg); border-radius: var(--radius-sm);
-    padding: 14px 16px; margin-bottom: 18px; font-size: 13px;
-    color: var(--muted); font-variant-numeric: tabular-nums;
-    display: flex; flex-direction: column; gap: 6px;
-  }
-  .checkout-breakdown .bk-row { display: flex; justify-content: space-between; }
-  .checkout-breakdown .bk-em { color: var(--fg); font-weight: 500; }
-
-  .modal-actions { display: flex; gap: 10px; }
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    padding: 15px; font-size: 16px; font-weight: 500;
-    font-family: var(--font-body); border-radius: var(--radius-full);
-    border: none; cursor: pointer; transition: all 0.15s ease; line-height: 1;
-  }
-  .btn:active { transform: scale(0.98); }
-  .btn-secondary {
-    background: var(--surface); color: var(--fg);
-    border: 1px solid var(--border); flex: 1;
-  }
-  .btn-danger {
-    background: var(--fg); color: var(--surface); flex: 1;
-  }
-  .btn-primary {
-    background: var(--accent); color: #fff; flex: 1;
-  }
-  .modal-actions .btn { flex: 1; }
-
   .settings-group { margin-bottom: 20px; }
   .settings-label {
     display: block; font-size: 12px; font-weight: 500;
@@ -277,16 +229,35 @@
     background: var(--surface); color: var(--fg);
     outline: none; font-variant-numeric: tabular-nums;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    touch-action: manipulation;
   }
-  .settings-input:focus {
+  .settings-input:focus-visible {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-muted);
   }
-  .settings-unit {
-    position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
-    font-size: 15px; color: var(--muted); font-weight: 500;
-  }
   .settings-field { position: relative; }
+
+  .toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 0; border-top: 1px solid var(--border); margin-bottom: 20px;
+  }
+  .toggle-label { font-size: 15px; font-weight: 500; }
+  .toggle-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .toggle-switch {
+    width: 48px; height: 28px; border-radius: var(--radius-full);
+    background: var(--border); cursor: pointer; transition: background 0.2s ease;
+    position: relative; flex-shrink: 0; border: none;
+    touch-action: manipulation;
+  }
+  .toggle-switch.on { background: var(--accent); }
+  .toggle-switch::after {
+    content: ''; position: absolute; top: 3px; left: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--surface); transition: transform 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  }
+  .toggle-switch.on::after { transform: translateX(20px); }
+  .toggle-switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   .pricing-preview {
     background: var(--accent-muted); border-radius: var(--radius-sm);
@@ -298,29 +269,69 @@
   .pricing-preview .pp-row { display: flex; justify-content: space-between; }
   .pricing-preview .pp-muted { color: var(--muted); font-size: 13px; }
 
-  .toggle-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 0; border-top: 1px solid var(--border);
-    margin-bottom: 22px;
+  /* modal */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex; align-items: flex-end; justify-content: center;
+    z-index: 100; animation: fadeIn 0.2s ease;
   }
-  .toggle-label { font-size: 15px; font-weight: 500; }
-  .toggle-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .toggle-switch {
-    width: 48px; height: 28px; border-radius: var(--radius-full);
-    background: var(--border); cursor: pointer; transition: background 0.2s ease;
-    position: relative; flex-shrink: 0;
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal-sheet {
+    background: var(--surface); border-radius: 22px 22px 0 0;
+    width: 100%; max-width: 430px; max-height: 88vh;
+    overflow-y: auto; padding: 20px 20px 34px;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 0 0 1px var(--border);
+    overscroll-behavior: contain;
   }
-  .toggle-switch.on { background: var(--accent); }
-  .toggle-switch::after {
-    content: ''; position: absolute; top: 3px; left: 3px;
-    width: 22px; height: 22px; border-radius: 50%;
-    background: var(--surface); transition: transform 0.2s ease;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal-handle {
+    width: 36px; height: 5px; border-radius: var(--radius-full);
+    background: var(--border); margin: 0 auto 20px;
   }
-  .toggle-switch.on::after { transform: translateX(20px); }
+  .modal-sheet h3 {
+    font-family: var(--font-display); font-size: 20px; font-weight: 600;
+    letter-spacing: -0.02em; margin-bottom: 20px; text-wrap: balance;
+  }
+  .checkout-details { display: flex; flex-direction: column; gap: 14px; margin-bottom: 22px; }
+  .checkout-row { display: flex; justify-content: space-between; align-items: center; }
+  .checkout-row .clabel { font-size: 15px; color: var(--muted); }
+  .checkout-row .cvalue { font-size: 16px; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .checkout-total { border-top: 1px solid var(--border); padding-top: 16px; margin-top: 6px; }
+  .checkout-total .clabel { font-size: 17px; font-weight: 500; color: var(--fg); }
+  .checkout-total .cvalue {
+    font-size: 28px; font-weight: 600; font-family: var(--font-display); letter-spacing: -0.02em;
+  }
+  .checkout-breakdown {
+    background: var(--bg); border-radius: var(--radius-sm);
+    padding: 14px 16px; margin-bottom: 18px; font-size: 13px;
+    color: var(--muted); font-variant-numeric: tabular-nums;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .checkout-breakdown .bk-row { display: flex; justify-content: space-between; }
+
+  .modal-actions { display: flex; gap: 10px; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 15px; font-size: 16px; font-weight: 500;
+    font-family: var(--font-body); border-radius: var(--radius-full);
+    border: none; cursor: pointer; transition: all 0.15s ease; line-height: 1;
+    touch-action: manipulation;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn-secondary { background: var(--surface); color: var(--fg); border: 1px solid var(--border); flex: 1; }
+  .btn-secondary:hover { background: var(--bg); }
+  .btn-danger { background: var(--fg); color: var(--surface); flex: 1; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { opacity: 0.9; }
+  .modal-actions .btn { flex: 1; }
 
   .toast {
-    position: fixed; bottom: 40px; left: 50%;
+    position: fixed;
+    bottom: calc(56px + env(safe-area-inset-bottom) + 16px);
+    left: 50%;
     transform: translateX(-50%) translateY(120px);
     background: var(--fg); color: var(--surface);
     padding: 12px 24px; border-radius: var(--radius-full);
@@ -331,11 +342,13 @@
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
 
-  .switch-link {
-    text-align: center; margin-top: 24px; padding-bottom: 8px;
-  }
-  .switch-link a {
-    color: var(--muted); font-size: 13px; text-decoration: none;
+  .switch-link { text-align: center; margin-top: 24px; padding-bottom: 8px; }
+  .switch-link a { color: var(--muted); font-size: 13px; text-decoration: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .status-dot { animation: none; opacity: 1; }
+    .modal-sheet, .modal-overlay { animation: none; }
+    *, *::before, *::after { transition-duration: 0.01ms !important; }
   }
 </style>
 </head>
@@ -345,58 +358,114 @@
   <header class="app-header">
     <div class="app-logo">Park<span>Check</span></div>
     <div class="header-actions">
-      <span class="badge-count" id="activeBadge">0</span>
-      <button class="icon-btn refresh-btn" onclick="refresh()" title="Atualizar">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+      <span class="badge-count" id="activeBadge" aria-label="0 veículos no pátio">0</span>
+      <button class="icon-btn refresh-btn" onclick="refresh()" aria-label="Atualizar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
       </button>
-      <button class="icon-btn" onclick="openSettings()" title="Configuracoes">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-      </button>
-      <button class="icon-btn" id="logoutBtn" title="Sair">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <button class="icon-btn" id="logoutBtn" aria-label="Sair">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </button>
     </div>
   </header>
 
-  <div class="main-content">
-    <div class="stats-row">
-      <div class="stat-card accent">
-        <div class="stat-value" id="statActive">0</div>
-        <div class="stat-label">Veiculos no patio</div>
+  <div class="panels">
+
+    <!-- Pátio -->
+    <div id="panel-patio" class="panel active">
+      <div class="stats-row">
+        <div class="stat-card accent">
+          <div class="stat-value" id="statActive">0</div>
+          <div class="stat-label">Veículos no pátio</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statToday">0</div>
+          <div class="stat-label">Check-ins hoje</div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-value" id="statToday">0</div>
-        <div class="stat-label">Check-ins hoje</div>
+
+      <div class="rate-summary" id="rateSummary"></div>
+
+      <div class="section-title">No pátio</div>
+      <div class="vehicle-list" id="vehicleList"></div>
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon" aria-hidden="true">&#x1f3c1;</div>
+        <h3>Pátio vazio</h3>
+        <p>Nenhum veículo no momento. Os check-ins aparecerão aqui automaticamente.</p>
+      </div>
+
+      <div class="switch-link">
+        <a href="cliente.html">Abrir tela de check-in do cliente</a>
       </div>
     </div>
 
-    <div class="rate-summary" id="rateSummary"></div>
-
-    <div class="section-title">No patio</div>
-    <div class="vehicle-list" id="vehicleList"></div>
-    <div class="empty-state" id="emptyState">
-      <div class="empty-icon">&#x1f3c1;</div>
-      <h3>Patio vazio</h3>
-      <p>Nenhum veiculo no momento. Os check-ins aparecerao aqui automaticamente.</p>
-    </div>
-
-    <div class="history-section">
-      <div class="section-title">Ultimos check-outs</div>
+    <!-- Histórico -->
+    <div id="panel-historico" class="panel">
+      <div class="section-title">Últimos check-outs</div>
       <div class="history-list" id="historyList"></div>
-      <div class="empty-state" id="historyEmpty" style="padding:28px 20px">
+      <div class="empty-state" id="historyEmpty">
+        <div class="empty-icon" aria-hidden="true">&#x1f4cb;</div>
+        <h3>Sem check-outs</h3>
         <p>Nenhum check-out realizado ainda.</p>
       </div>
     </div>
 
-    <div class="switch-link">
-      <a href="cliente.html">Abrir tela de check-in do cliente</a>
+    <!-- Config -->
+    <div id="panel-config" class="panel">
+      <h2 class="config-title">Configuração de preços</h2>
+
+      <div class="settings-group">
+        <label class="settings-label" for="settingsFirstHour">Valor da 1ª hora</label>
+        <div class="settings-field">
+          <input class="settings-input" id="settingsFirstHour" name="rate_first_hour"
+                 type="number" step="0.50" min="1" placeholder="10,00…" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Cobrar valor adicional</div>
+          <div class="toggle-desc">Após a 1ª hora, cada hora (ou fração) iniciada custa outro valor</div>
+        </div>
+        <button class="toggle-switch" id="toggleSubsequentRate"
+                role="switch" aria-checked="false"
+                aria-label="Cobrar valor adicional por hora"></button>
+      </div>
+
+      <div class="settings-group" id="subsequentGroup">
+        <label class="settings-label" for="settingsSubsequent">Valor por hora adicional</label>
+        <div class="settings-field">
+          <input class="settings-input" id="settingsSubsequent" name="rate_subsequent"
+                 type="number" step="0.50" min="1" placeholder="8,00…" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="pricing-preview" id="pricingPreview"></div>
+
+      <button class="btn btn-primary" onclick="saveSettingsAction()" style="width:100%; padding: 14px 20px;">
+        Salvar configurações
+      </button>
     </div>
+
   </div>
+
+  <nav class="bottom-nav" aria-label="Navegação principal">
+    <button class="nav-btn active" data-tab="patio" onclick="switchTab('patio')" aria-label="Pátio">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      <span>Pátio</span>
+    </button>
+    <button class="nav-btn" data-tab="historico" onclick="switchTab('historico')" aria-label="Histórico de check-outs">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Histórico</span>
+    </button>
+    <button class="nav-btn" data-tab="config" onclick="switchTab('config')" aria-label="Configurações">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      <span>Config</span>
+    </button>
+  </nav>
 
 </div>
 
 <div class="modal-overlay" id="modalOverlay" style="display:none"></div>
-<div class="modal-overlay" id="settingsOverlay" style="display:none"></div>
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -409,11 +478,10 @@ let _timer = null
 let _activeCheckins = []
 let _settings = { rateFirstHour: 10, rateSubsequent: 8, useSubsequentRate: true, showCost: true }
 
-
-function fmtCurrency(v) { return 'R$ '+v.toFixed(2).replace('.',','); }
+function fmtCurrency(v) { return 'R$ '+v.toFixed(2).replace('.',','); }
 function fmtTime(d) { return d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
 function fmtDate(d) { return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}); }
-function fmtDateTime(d) { return fmtDate(d)+' as '+fmtTime(d); }
+function fmtDateTime(d) { return fmtDate(d)+' às '+fmtTime(d); }
 
 function calcDuration(cIn, cOut) {
   var diff = (cOut || Date.now()) - cIn;
@@ -422,7 +490,7 @@ function calcDuration(cIn, cOut) {
 }
 function fmtDuration(cIn, cOut) {
   var d = calcDuration(cIn, cOut);
-  return d.h===0 ? d.rem+'min' : d.h+'h '+String(d.rem).padStart(2,'0')+'min';
+  return d.h===0 ? d.rem+'min' : d.h+'h '+String(d.rem).padStart(2,'0')+'min';
 }
 
 function calcAmount(min, s) {
@@ -444,19 +512,20 @@ function calcAmountDetail(min, s) {
     return { total: totalSame, firstAmount: s.rateFirstHour, extraAmount: totalSame - s.rateFirstHour, firstMin: 60, extraMin: min - 60 };
   }
   var extraAmount = extraHours * s.rateSubsequent;
-  return {
-    total: s.rateFirstHour + extraAmount,
-    firstAmount: s.rateFirstHour,
-    extraAmount: extraAmount,
-    firstMin: 60,
-    extraMin: min - 60
-  };
+  return { total: s.rateFirstHour + extraAmount, firstAmount: s.rateFirstHour, extraAmount, firstMin: 60, extraMin: min - 60 };
 }
 
 function showToast(msg) {
   var t = document.getElementById('toast');
   t.innerHTML = msg; t.classList.add('show');
   clearTimeout(t._tid); t._tid = setTimeout(function(){ t.classList.remove('show'); }, 2400);
+}
+
+window.switchTab = function(tab) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'))
+  document.getElementById('panel-'+tab).classList.add('active')
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'))
+  document.querySelector('[data-tab="'+tab+'"]').classList.add('active')
 }
 
 window.refresh = async function() { await render(); showToast('Atualizado') }
@@ -472,8 +541,8 @@ window.openCheckout = function(id) {
 
   document.getElementById('modalOverlay').style.display = 'flex'
   document.getElementById('modalOverlay').innerHTML =
-    '<div class="modal-sheet" onclick="event.stopPropagation()">'+
-    '<div class="modal-handle"></div>'+
+    '<div class="modal-sheet" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Check-out do veículo">'+
+    '<div class="modal-handle" aria-hidden="true"></div>'+
     '<h3>Check-out do veículo</h3>'+
     '<div class="checkout-details">'+
     '<div class="checkout-row"><span class="clabel">Placa</span><span class="cvalue" style="font-family:var(--font-display);letter-spacing:0.06em;font-weight:600">'+c.plate+'</span></div>'+
@@ -486,7 +555,7 @@ window.openCheckout = function(id) {
     '</div>'+
     '<div class="checkout-breakdown">'+
     '<div class="bk-row"><span>1ª hora</span><span>'+fmtCurrency(detail.firstAmount)+'</span></div>'+
-    (detail.extraAmount > 0 ? '<div class="bk-row"><span>Horas extras ('+Math.ceil(detail.extraMin/60)+' × '+fmtCurrency(detail.extraAmount / Math.ceil(detail.extraMin/60))+')</span><span>'+fmtCurrency(detail.extraAmount)+'</span></div>' : '')+
+    (detail.extraAmount > 0 ? '<div class="bk-row"><span>Horas extras ('+Math.ceil(detail.extraMin/60)+' × '+fmtCurrency(detail.extraAmount / Math.ceil(detail.extraMin/60))+')</span><span>'+fmtCurrency(detail.extraAmount)+'</span></div>' : '')+
     '</div>'+
     '<div class="modal-actions">'+
     '<button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>'+
@@ -495,89 +564,47 @@ window.openCheckout = function(id) {
     '</div>'
 }
 
-window.closeModal = function(e) {
-  if (e && e.target !== document.getElementById('modalOverlay') && e.target !== document.getElementById('settingsOverlay')) return
+window.closeModal = function() {
   document.getElementById('modalOverlay').style.display = 'none'
-  document.getElementById('settingsOverlay').style.display = 'none'
 }
-document.getElementById('modalOverlay').addEventListener('click', function(e){ if(e.target===this) window.closeModal(e) })
-document.getElementById('settingsOverlay').addEventListener('click', function(e){ if(e.target===this) window.closeModal(e) })
+document.getElementById('modalOverlay').addEventListener('click', function(e){ if(e.target===this) window.closeModal() })
 
 window.confirmCheckout = async function(id, amount) {
   await completeCheckout(id, amount)
   document.getElementById('modalOverlay').style.display = 'none'
-  showToast('Check-out realizado — ' + fmtCurrency(amount))
+  showToast('Check-out realizado — ' + fmtCurrency(amount))
   await render()
 }
 
-window.openSettings = function() {
-  var s = _settings;
-  document.getElementById('settingsOverlay').style.display = 'flex';
-  document.getElementById('settingsOverlay').innerHTML =
-    '<div class="modal-sheet" onclick="event.stopPropagation()">'+
-    '<div class="modal-handle"></div>'+
-    '<h3>Configuracao de precos</h3>'+
-    '<div class="settings-group">'+
-    '<label class="settings-label">Valor da 1&ordf; hora</label>'+
-    '<div class="settings-field">'+
-    '<input class="settings-input" id="settingsFirstHour" type="number" value="'+s.rateFirstHour.toFixed(2)+'" step="0.50" min="1" placeholder="10,00">'+
-    '</div>'+
-    '</div>'+
-    '<div class="toggle-row">'+
-    '<div><div class="toggle-label">Cobrar valor adicional</div><div class="toggle-desc">Apos a 1&ordf; hora, cada hora (ou fracao) iniciada custa outro valor</div></div>'+
-    '<div class="toggle-switch'+(s.useSubsequentRate?' on':'')+'" id="toggleSubsequentRate"></div>'+
-    '</div>'+
-    '<div class="settings-group" id="subsequentGroup" style="'+(s.useSubsequentRate?'':'opacity:0.4;pointer-events:none')+'">'+
-    '<label class="settings-label">Valor por hora adicional</label>'+
-    '<div class="settings-field">'+
-    '<input class="settings-input" id="settingsSubsequent" type="number" value="'+s.rateSubsequent.toFixed(2)+'" step="0.50" min="1" placeholder="8,00">'+
-    '</div>'+
-    '</div>'+
-    '<div class="pricing-preview" id="pricingPreview">'+
-    '<div class="pp-row"><span class="pp-muted">Exemplo 30 min:</span><span>'+fmtCurrency(calcAmount(30, s))+'</span></div>'+
-    '<div class="pp-row"><span class="pp-muted">Exemplo 1 h:</span><span>'+fmtCurrency(calcAmount(60, s))+'</span></div>'+
-    '<div class="pp-row"><span class="pp-muted">Exemplo 1 h 30:</span><span>'+fmtCurrency(calcAmount(90, s))+'</span></div>'+
-    '<div class="pp-row"><span class="pp-muted">Exemplo 3 h:</span><span>'+fmtCurrency(calcAmount(180, s))+'</span></div>'+
-    '</div>'+
-    '<div class="modal-actions">'+
-    '<button class="btn btn-secondary" onclick="closeSettings()">Cancelar</button>'+
-    '<button class="btn btn-primary" onclick="saveSettingsAction()">Salvar</button>'+
-    '</div>'+
-    '</div>';
-
-  var toggleEl = document.getElementById('toggleSubsequentRate');
-  var subGroup = document.getElementById('subsequentGroup');
-  var firstInp = document.getElementById('settingsFirstHour');
-  var subInp = document.getElementById('settingsSubsequent');
-  var useSub = s.useSubsequentRate;
-
-  toggleEl.addEventListener('click', function(){
-    useSub = !useSub;
-    toggleEl.classList.toggle('on', useSub);
-    subGroup.style.opacity = useSub ? '' : '0.4';
-    subGroup.style.pointerEvents = useSub ? '' : 'none';
-    updatePreview();
-  });
-
-  function updatePreview() {
-    var v1 = parseFloat(firstInp.value) || 0;
-    var v2 = parseFloat(subInp.value) || 0;
-    var tmp = { rateFirstHour: v1, rateSubsequent: v2, useSubsequentRate: useSub };
-    document.getElementById('pricingPreview').innerHTML =
-      '<div class="pp-row"><span class="pp-muted">Exemplo 30 min:</span><span>'+fmtCurrency(calcAmount(30, tmp))+'</span></div>'+
-      '<div class="pp-row"><span class="pp-muted">Exemplo 1 h:</span><span>'+fmtCurrency(calcAmount(60, tmp))+'</span></div>'+
-      '<div class="pp-row"><span class="pp-muted">Exemplo 1 h 30:</span><span>'+fmtCurrency(calcAmount(90, tmp))+'</span></div>'+
-      '<div class="pp-row"><span class="pp-muted">Exemplo 3 h:</span><span>'+fmtCurrency(calcAmount(180, tmp))+'</span></div>';
-  }
-
-  if (firstInp && subInp) {
-    firstInp.addEventListener('input', updatePreview);
-    subInp.addEventListener('input', updatePreview);
-  }
+function updatePreview() {
+  const firstInp = document.getElementById('settingsFirstHour')
+  const subInp = document.getElementById('settingsSubsequent')
+  const toggleEl = document.getElementById('toggleSubsequentRate')
+  if (!firstInp) return
+  const v1 = parseFloat(firstInp.value) || 0
+  const v2 = parseFloat(subInp.value) || 0
+  const useSub = toggleEl.classList.contains('on')
+  const tmp = { rateFirstHour: v1, rateSubsequent: v2, useSubsequentRate: useSub }
+  document.getElementById('pricingPreview').innerHTML =
+    '<div class="pp-row"><span class="pp-muted">Exemplo 30 min:</span><span>'+fmtCurrency(calcAmount(30, tmp))+'</span></div>'+
+    '<div class="pp-row"><span class="pp-muted">Exemplo 1 h:</span><span>'+fmtCurrency(calcAmount(60, tmp))+'</span></div>'+
+    '<div class="pp-row"><span class="pp-muted">Exemplo 1 h 30:</span><span>'+fmtCurrency(calcAmount(90, tmp))+'</span></div>'+
+    '<div class="pp-row"><span class="pp-muted">Exemplo 3 h:</span><span>'+fmtCurrency(calcAmount(180, tmp))+'</span></div>'
 }
 
-window.closeSettings = function() {
-  document.getElementById('settingsOverlay').style.display = 'none'
+function updateSettingsForm() {
+  const s = _settings
+  const firstInp = document.getElementById('settingsFirstHour')
+  const subInp = document.getElementById('settingsSubsequent')
+  const toggleEl = document.getElementById('toggleSubsequentRate')
+  const subGroup = document.getElementById('subsequentGroup')
+  firstInp.value = s.rateFirstHour.toFixed(2)
+  subInp.value = s.rateSubsequent.toFixed(2)
+  toggleEl.classList.toggle('on', s.useSubsequentRate)
+  toggleEl.setAttribute('aria-checked', String(s.useSubsequentRate))
+  subGroup.style.opacity = s.useSubsequentRate ? '' : '0.4'
+  subGroup.style.pointerEvents = s.useSubsequentRate ? '' : 'none'
+  updatePreview()
 }
 
 window.saveSettingsAction = async function() {
@@ -585,7 +612,6 @@ window.saveSettingsAction = async function() {
   const v2 = parseFloat(document.getElementById('settingsSubsequent').value) || 8
   const useSub = document.getElementById('toggleSubsequentRate').classList.contains('on')
   await updateSettings({ rateFirstHour: v1, rateSubsequent: v2, useSubsequentRate: useSub })
-  document.getElementById('settingsOverlay').style.display = 'none'
   showToast('Preços atualizados')
   await render()
 }
@@ -599,10 +625,11 @@ async function render() {
 
   document.getElementById('statActive').textContent = _activeCheckins.length
   document.getElementById('activeBadge').textContent = _activeCheckins.length
+  document.getElementById('activeBadge').setAttribute('aria-label', _activeCheckins.length+' veículos no pátio')
   document.getElementById('statToday').textContent = today.length
 
   const rateText = s.useSubsequentRate
-    ? '1ª hora <strong>'+fmtCurrency(s.rateFirstHour)+'</strong> · Hora extra <strong>'+fmtCurrency(s.rateSubsequent)+'</strong>'
+    ? '1ª hora <strong>'+fmtCurrency(s.rateFirstHour)+'</strong> · Hora extra <strong>'+fmtCurrency(s.rateSubsequent)+'</strong>'
     : 'Preço fixo <strong>'+fmtCurrency(s.rateFirstHour)+'/hora</strong>'
   document.getElementById('rateSummary').innerHTML = rateText
 
@@ -620,7 +647,7 @@ async function render() {
       return '<div class="vehicle-card">'+
         '<div class="vehicle-info">'+
         '<div class="vehicle-plate">'+c.plate+'</div>'+
-        '<div class="vehicle-name"><span class="status-dot"></span>'+c.name+'</div>'+
+        '<div class="vehicle-name"><span class="status-dot" aria-hidden="true"></span>'+c.name+'</div>'+
         (c.phone ? '<div class="vehicle-name" style="margin-top:1px">'+c.phone+'</div>' : '')+
         '</div>'+
         '<div class="vehicle-time">'+
@@ -628,7 +655,7 @@ async function render() {
         '<div class="vehicle-cost" data-cost-id="'+c.id+'">'+fmtCurrency(cost)+'</div>'+
         '<div class="vehicle-entry">'+fmtTime(dIn)+'</div>'+
         '</div>'+
-        '<button class="btn-small" onclick="openCheckout(\''+c.id+'\')">Check-out</button>'+
+        '<button class="btn-small" onclick="openCheckout(\''+c.id+'\')" aria-label="Check-out de '+c.plate+'">Check-out</button>'+
         '</div>'
     }).join('')
   }
@@ -648,6 +675,8 @@ async function render() {
     }).join('')
   }
 
+  updateSettingsForm()
+
   if (_timer) clearInterval(_timer)
   _timer = setInterval(updateTimers, 10000)
 }
@@ -666,6 +695,22 @@ function updateTimers() {
 ;(async () => {
   await requireAuth()
   document.getElementById('logoutBtn').addEventListener('click', signOut)
+
+  const toggleEl = document.getElementById('toggleSubsequentRate')
+  const subGroup = document.getElementById('subsequentGroup')
+  toggleEl.addEventListener('click', function() {
+    const isOn = toggleEl.classList.toggle('on')
+    toggleEl.setAttribute('aria-checked', String(isOn))
+    subGroup.style.opacity = isOn ? '' : '0.4'
+    subGroup.style.pointerEvents = isOn ? '' : 'none'
+    updatePreview()
+  })
+  toggleEl.addEventListener('keydown', function(e) {
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleEl.click() }
+  })
+  document.getElementById('settingsFirstHour').addEventListener('input', updatePreview)
+  document.getElementById('settingsSubsequent').addEventListener('input', updatePreview)
+
   await render()
   subscribeToCheckins(async () => { await render() })
 })()
