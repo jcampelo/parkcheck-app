@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>ParkCheck · Cliente</title>
+<style>
+  :root {
+    --bg:      oklch(99% 0.002 240);
+    --surface: oklch(100% 0 0);
+    --fg:      oklch(18% 0.012 250);
+    --muted:   oklch(54% 0.012 250);
+    --border:  oklch(92% 0.005 250);
+    --accent:  oklch(58% 0.18 255);
+    --success: oklch(62% 0.16 150);
+    --success-bg: oklch(62% 0.16 150 / 0.10);
+    --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+    --font-body:    -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-full: 9999px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    background: oklch(96% 0.004 250);
+    color: var(--fg);
+    display: flex; justify-content: center; align-items: center;
+    min-height: 100dvh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #app {
+    width: 100%; max-width: 430px;
+    height: 100dvh; max-height: 932px;
+    background: var(--bg);
+    display: flex; flex-direction: column; overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 0 1px var(--border), 0 25px 50px -12px rgba(0,0,0,0.12);
+  }
+  @media (min-width: 500px) { #app { border-radius: 32px; height: min(100dvh - 40px, 900px); } }
+
+  .app-header {
+    padding: 18px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0; background: var(--bg);
+  }
+  .app-logo {
+    font-family: var(--font-display);
+    font-size: 22px; font-weight: 600; letter-spacing: -0.02em;
+  }
+  .app-logo span { color: var(--accent); }
+
+  .role-badge {
+    font-size: 11px; font-weight: 500; color: var(--muted);
+    background: var(--border); padding: 6px 14px; border-radius: var(--radius-full);
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+
+  .main-content {
+    flex: 1; overflow-y: auto; padding: 20px;
+    display: flex; flex-direction: column;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .screen { display: none; flex-direction: column; flex: 1; }
+  .screen.active { display: flex; animation: fadeSlideIn 0.32s ease; }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero { text-align: center; margin-bottom: 28px; margin-top: 4px; }
+  .qr-badge {
+    width: 60px; height: 60px; border-radius: var(--radius-md);
+    background: var(--surface); border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 14px;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: 26px; font-weight: 600; letter-spacing: -0.02em;
+    line-height: 1.15; margin-bottom: 6px;
+  }
+  .hero > p { color: var(--muted); font-size: 15px; line-height: 1.35; }
+
+  .form-group { margin-bottom: 18px; }
+  .form-label {
+    display: block; font-size: 12px; font-weight: 500; color: var(--muted);
+    margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+
+  .form-input {
+    width: 100%; padding: 15px 16px;
+    font-size: 17px; font-family: var(--font-body);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--fg);
+    outline: none; transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .form-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px oklch(58% 0.18 255 / 0.14);
+  }
+  .form-input::placeholder { color: oklch(80% 0.012 250); }
+
+  .plate-input {
+    text-transform: uppercase; letter-spacing: 0.10em;
+    font-weight: 600; text-align: center; font-size: 24px;
+    font-family: var(--font-display);
+  }
+  .plate-hint {
+    font-size: 12px; color: var(--muted); text-align: right; margin-top: 4px;
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 16px 28px; font-size: 16px; font-weight: 500;
+    font-family: var(--font-body); border-radius: var(--radius-full);
+    border: none; cursor: pointer; transition: all 0.15s ease;
+    line-height: 1;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary {
+    background: var(--accent); color: #fff; width: 100%; font-size: 17px;
+  }
+  .btn-primary:disabled { opacity: 0.5; pointer-events: none; }
+  .btn-secondary {
+    background: var(--surface); color: var(--fg);
+    border: 1px solid var(--border); width: 100%;
+  }
+  .btn-outline {
+    background: transparent; color: var(--accent);
+    border: 1px solid var(--accent); width: 100%; padding: 13px; font-size: 15px;
+  }
+
+  .loading-screen {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;
+  }
+  .spinner {
+    width: 44px; height: 44px;
+    border: 3px solid var(--border); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 0.65s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { color: var(--muted); font-size: 15px; }
+
+  .confirm-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 28px 24px; text-align: center;
+  }
+  .confirm-icon {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: var(--success-bg); display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px; color: var(--success);
+  }
+  .confirm-card h2 {
+    font-family: var(--font-display);
+    font-size: 22px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 4px;
+  }
+  .confirm-card > .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+
+  .confirm-details {
+    background: var(--bg); border-radius: var(--radius-sm); padding: 18px;
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; text-align: left;
+  }
+  .detail-item { display: flex; flex-direction: column; gap: 3px; }
+  .detail-label {
+    font-size: 11px; font-weight: 500; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .detail-value {
+    font-size: 16px; font-weight: 500; color: var(--fg);
+    font-variant-numeric: tabular-nums;
+  }
+  .detail-value.plate {
+    font-family: var(--font-display); letter-spacing: 0.06em; font-size: 19px;
+  }
+
+  .voucher-section { margin-top: 24px; text-align: center; }
+  .voucher-section > p { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+  .voucher-card {
+    background: var(--bg); border: 1.5px dashed var(--border);
+    border-radius: var(--radius-sm); padding: 20px; margin-bottom: 14px;
+  }
+  .voucher-card .vc-header {
+    font-family: var(--font-display); font-size: 12px; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 12px;
+  }
+  .voucher-card .vc-plate {
+    font-family: var(--font-display); font-size: 34px; font-weight: 700;
+    letter-spacing: 0.08em; margin-bottom: 2px;
+  }
+  .voucher-card .vc-time { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .voucher-card .vc-footer { margin-top: 12px; font-size: 11px; color: var(--muted); }
+
+  .toast {
+    position: fixed; bottom: 40px; left: 50%;
+    transform: translateX(-50%) translateY(120px);
+    background: var(--fg); color: var(--surface);
+    padding: 12px 24px; border-radius: var(--radius-full);
+    font-size: 14px; font-weight: 500; z-index: 200;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none; box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .mt-auto { margin-top: auto; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header class="app-header">
+    <div class="app-logo">Park<span>Check</span></div>
+    <div class="role-badge">Check-in</div>
+  </header>
+
+  <div class="main-content">
+
+    <div class="screen active" id="screen-form">
+      <div class="hero">
+        <div class="qr-badge">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M15 14h3v3h-3z"/><path d="M15 19h3v2.5"/><path d="M19 18h2"/><path d="M15.5 19h.5"/></svg>
+        </div>
+        <h1>Registrar entrada</h1>
+        <p>Preencha os dados do veículo para registrar o check-in.</p>
+      </div>
+
+      <form id="checkinForm" autocomplete="off">
+        <div class="form-group">
+          <label class="form-label" for="plate">Placa do veículo</label>
+          <input class="form-input plate-input" type="text" id="plate" name="plate" placeholder="ABC1D23" maxlength="7" required autofocus>
+          <div class="plate-hint">Padrão Mercosul ou antigo — 7 caracteres</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="name">Nome do condutor</label>
+          <input class="form-input" type="text" id="name" name="name" placeholder="Nome completo" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="phone">Telefone (WhatsApp)</label>
+          <input class="form-input" type="tel" id="phone" name="phone" placeholder="(99) 99999-9999" required>
+        </div>
+        <button type="submit" class="btn btn-primary" id="checkinBtn">Registrar entrada</button>
+      </form>
+    </div>
+
+    <div class="screen" id="screen-loading">
+      <div class="loading-screen">
+        <div class="spinner"></div>
+        <p class="loading-text">Registrando entrada…</p>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-done">
+      <div class="confirm-card">
+        <div class="confirm-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h2>Check-in realizado!</h2>
+        <p class="subtitle">O veículo foi registrado com sucesso.</p>
+        <div class="confirm-details" id="confirmDetails"></div>
+      </div>
+      <div class="voucher-section">
+        <p>Seu comprovante de entrada</p>
+        <div class="voucher-card" id="voucherCard"></div>
+        <button class="btn btn-outline" onclick="downloadVoucher()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Baixar comprovante
+        </button>
+        <button class="btn btn-secondary" style="margin-top:8px" onclick="resetFlow()">Novo registro</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createCheckin, plateIsActive } from './src/db.js'
+
+function formatDate(d) { return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' }) }
+function formatTime(d) { return d.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }) }
+function formatDateTime(d) { return formatDate(d) + ' às ' + formatTime(d) }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'))
+  document.getElementById(id).classList.add('active')
+  if (id === 'screen-form') document.getElementById('checkinForm').reset()
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast')
+  t.innerHTML = msg; t.classList.add('show')
+  clearTimeout(t._tid); t._tid = setTimeout(() => t.classList.remove('show'), 2400)
+}
+
+window.resetFlow = () => showScreen('screen-form')
+
+let _lastCheckin = null
+
+function renderDone(c) {
+  _lastCheckin = c
+  const dt = new Date(c.checkinTime)
+  document.getElementById('confirmDetails').innerHTML =
+    '<div class="detail-item"><span class="detail-label">Placa</span><span class="detail-value plate">'+c.plate+'</span></div>'+
+    '<div class="detail-item"><span class="detail-label">Nome</span><span class="detail-value">'+c.name+'</span></div>'+
+    '<div class="detail-item"><span class="detail-label">Telefone</span><span class="detail-value">'+c.phone+'</span></div>'+
+    '<div class="detail-item"><span class="detail-label">Data</span><span class="detail-value">'+formatDate(dt)+'</span></div>'+
+    '<div class="detail-item"><span class="detail-label">Entrada</span><span class="detail-value">'+formatTime(dt)+'</span></div>'+
+    '<div class="detail-item"><span class="detail-label">Codigo</span><span class="detail-value">'+c.id+'</span></div>'
+  document.getElementById('voucherCard').innerHTML =
+    '<div class="vc-header">ParkCheck &middot; Comprovante de Entrada</div>'+
+    '<div class="vc-plate">'+c.plate+'</div>'+
+    '<div class="vc-time">'+formatDateTime(dt)+'</div>'+
+    '<div style="font-size:13px;margin-top:6px">'+c.name+' &middot; '+c.phone+'</div>'+
+    '<div class="vc-footer">Codigo '+c.id+'</div>'
+}
+
+window.downloadVoucher = function() {
+  const c = _lastCheckin; if (!c) return
+  const canvas = document.createElement('canvas')
+  canvas.width = 840; canvas.height = 440
+  const ctx = canvas.getContext('2d')
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,840,440)
+  const grad = ctx.createLinearGradient(0,0,840,100)
+  grad.addColorStop(0,'#1a6ff5'); grad.addColorStop(1,'#3b82f6')
+  ctx.fillStyle = grad
+  ctx.beginPath(); ctx.roundRect(0,0,840,100,[12,12,0,0]); ctx.fill()
+  ctx.fillStyle = '#ffffff'
+  ctx.font = '600 36px -apple-system, "Segoe UI", system-ui, sans-serif'
+  ctx.fillText('ParkCheck', 44, 65)
+  const dt = new Date(c.checkinTime)
+  ctx.fillStyle = '#1a1a2e'
+  ctx.font = '600 22px -apple-system, system-ui, sans-serif'
+  ctx.fillText('Comprovante de Entrada', 44, 145)
+  ctx.font = '700 60px -apple-system, system-ui, sans-serif'
+  ctx.fillText(c.plate, 44, 215)
+  ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1
+  ctx.beginPath(); ctx.moveTo(44,240); ctx.lineTo(796,240); ctx.stroke()
+  ctx.font = '500 21px -apple-system, system-ui, sans-serif'
+  ctx.fillStyle = '#6b7280'; ctx.fillText('Cliente', 44, 285)
+  ctx.fillStyle = '#1a1a2e'; ctx.fillText(c.name, 44, 314)
+  ctx.fillStyle = '#6b7280'; ctx.fillText('Telefone', 280, 285)
+  ctx.fillStyle = '#1a1a2e'; ctx.fillText(c.phone, 280, 314)
+  ctx.fillStyle = '#6b7280'; ctx.fillText('Data', 560, 285)
+  ctx.fillStyle = '#1a1a2e'; ctx.fillText(formatDate(dt), 560, 314)
+  ctx.fillStyle = '#6b7280'; ctx.fillText('Horario de entrada', 44, 360)
+  ctx.fillStyle = '#1a1a2e'; ctx.fillText(formatTime(dt), 44, 389)
+  ctx.fillStyle = '#6b7280'; ctx.fillText('Codigo', 280, 360)
+  ctx.fillStyle = '#1a1a2e'; ctx.fillText(c.id, 280, 389)
+  ctx.fillStyle = '#d1d5db'
+  ctx.font = '400 13px -apple-system, system-ui, sans-serif'
+  ctx.fillText('Guarde este comprovante. Apresente no caixa para liberacao do veiculo.', 44, 428)
+  const a = document.createElement('a')
+  a.download = 'ParkCheck_Comprovante_'+c.plate+'.png'
+  a.href = canvas.toDataURL('image/png')
+  a.click()
+  showToast('Comprovante baixado!')
+}
+
+document.getElementById('checkinForm').addEventListener('submit', async (e) => {
+  e.preventDefault()
+  const plate = document.getElementById('plate').value.trim().toUpperCase()
+  const name = document.getElementById('name').value.trim()
+  const phone = document.getElementById('phone').value.trim()
+  if (!plate || !name || !phone) return
+
+  const active = await plateIsActive(plate)
+  if (active) { showToast('Esta placa já está registrada no pátio'); return }
+
+  showScreen('screen-loading')
+  try {
+    const entry = await createCheckin({ plate, name, phone })
+    renderDone(entry)
+    showScreen('screen-done')
+    setTimeout(window.downloadVoucher, 400)
+  } catch {
+    showToast('Erro ao registrar. Tente novamente.')
+    showScreen('screen-form')
+  }
+})
+</script>
+</body>
+</html>

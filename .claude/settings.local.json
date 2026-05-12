@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\pchome\\\\projetos-claude-code\\\\park-check\" -File | ForEach-Object { $_.Name })",
+      "Bash(npx skills *)",
+      "WebFetch(domain:skills.sh)",
+      "Bash(bash \"C:/Users/pchome/.agents/skills/brainstorming/scripts/start-server.sh\" --project-dir \"c:/Users/pchome/projetos-claude-code/park-check\")",
+      "PowerShell(Get-ChildItem \"$env:USERPROFILE\\\\AppData\\\\Local\\\\AnthropicClaude\" -ErrorAction SilentlyContinue | Select-Object Name; Get-ChildItem \"$env:USERPROFILE\\\\.claude\" -ErrorAction SilentlyContinue | Select-Object Name)",
+      "PowerShell(Get-ChildItem \"$env:USERPROFILE\\\\.claude\" -ErrorAction SilentlyContinue | Select-Object Name, FullName)",
+      "PowerShell(Test-Path \"$env:USERPROFILE\\\\.claude\"; ls \"$env:USERPROFILE\\\\.claude\" -ErrorAction SilentlyContinue)",
+      "PowerShell(ls \"$env:USERPROFILE\\\\.claude\" | Select-Object Name; Test-Path \"$env:USERPROFILE\\\\.claude\\\\mcp.json\")",
+      "PowerShell(Get-ChildItem \"$env:USERPROFILE\\\\.claude\" | ForEach-Object { $_.Name }; Write-Host \"---\"; Test-Path \"$env:USERPROFILE\\\\.claude\\\\mcp.json\")",
+      "PowerShell(Test-Path \"$env:USERPROFILE\\\\.claude.json\"; if \\(Test-Path \"$env:USERPROFILE\\\\.claude.json\"\\) { Get-Content \"$env:USERPROFILE\\\\.claude.json\" | Select-Object -First 30 })",
+      "PowerShell($json = Get-Content \"$env:USERPROFILE\\\\.claude.json\" -Raw | ConvertFrom-Json; if \\($json.projects\\) { $json.projects | ConvertTo-Json -Depth 3 | Select-Object -First 50 } else { \"No projects key found\" })",
+      "Bash(gh auth *)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
+    ]
+  }
+}
