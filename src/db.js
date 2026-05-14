@@ -92,6 +92,18 @@ export async function getSettings() {
   return settingsToLocal(data)
 }
 
+export async function getCompletedInRange(startDate, endDate) {
+  const { data, error } = await supabase
+    .from('check_ins')
+    .select('checkout_time, amount')
+    .eq('status', 'completed')
+    .gte('checkout_time', startDate.toISOString())
+    .lt('checkout_time', endDate.toISOString())
+    .order('checkout_time', { ascending: true })
+  if (error) throw error
+  return data
+}
+
 export async function updateSettings({ rateFirstHour, rateSubsequent, useSubsequentRate }) {
   const { error } = await supabase
     .from('settings')

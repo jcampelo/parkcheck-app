@@ -345,6 +345,74 @@
   .switch-link { text-align: center; margin-top: 24px; padding-bottom: 8px; }
   .switch-link a { color: var(--muted); font-size: 13px; text-decoration: none; }
 
+  /* earnings panel */
+  .gain-hero {
+    background: linear-gradient(135deg, var(--accent) 0%, oklch(48% 0.20 265) 100%);
+    border-radius: var(--radius-sm); padding: 24px 20px 22px;
+    margin-bottom: 14px; color: #fff;
+  }
+  .gain-hero-label {
+    font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.07em; opacity: 0.8; margin-bottom: 6px;
+  }
+  .gain-hero-value {
+    font-family: var(--font-display); font-size: 40px; font-weight: 600;
+    letter-spacing: -0.03em; font-variant-numeric: tabular-nums; line-height: 1;
+    margin-bottom: 4px;
+  }
+  .gain-hero-sub { font-size: 13px; opacity: 0.75; }
+
+  .period-selector {
+    display: flex; gap: 6px; margin-bottom: 18px;
+  }
+  .period-btn {
+    flex: 1; padding: 9px 0; border-radius: var(--radius-full);
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--muted); font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s ease;
+    font-family: var(--font-body); touch-action: manipulation;
+  }
+  .period-btn.active {
+    background: var(--fg); color: var(--surface); border-color: var(--fg);
+  }
+  .period-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .period-summary {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 12px;
+  }
+  .period-summary-label { font-size: 13px; color: var(--muted); }
+  .period-summary-total {
+    font-family: var(--font-display); font-size: 20px; font-weight: 600;
+    font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+    color: var(--success);
+  }
+
+  .earnings-list { display: flex; flex-direction: column; gap: 8px; }
+  .earnings-row {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 16px;
+  }
+  .earnings-row-top {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 7px;
+  }
+  .earnings-day { font-size: 13px; font-weight: 500; }
+  .earnings-day-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .earnings-amount {
+    font-family: var(--font-display); font-size: 15px; font-weight: 600;
+    font-variant-numeric: tabular-nums; color: var(--success);
+  }
+  .earnings-amount.zero { color: var(--muted); font-weight: 400; }
+  .earnings-bar-track {
+    height: 5px; background: var(--border); border-radius: 99px; overflow: hidden;
+  }
+  .earnings-bar-fill {
+    height: 100%; background: var(--success); border-radius: 99px;
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .earnings-count { font-size: 11px; color: var(--muted); margin-top: 5px; }
+
   @media (prefers-reduced-motion: reduce) {
     .status-dot { animation: none; opacity: 1; }
     .modal-sheet, .modal-overlay { animation: none; }
@@ -409,6 +477,33 @@
       </div>
     </div>
 
+    <!-- Ganhos -->
+    <div id="panel-ganhos" class="panel">
+      <div class="gain-hero">
+        <div class="gain-hero-label">Ganhos hoje</div>
+        <div class="gain-hero-value" id="gainToday">R$ 0,00</div>
+        <div class="gain-hero-sub" id="gainTodayCount">0 check-outs realizados</div>
+      </div>
+
+      <div class="period-selector">
+        <button class="period-btn active" id="btnWeek" onclick="selectPeriod('week')">Esta semana</button>
+        <button class="period-btn" id="btnMonth" onclick="selectPeriod('month')">Este mês</button>
+      </div>
+
+      <div class="period-summary">
+        <span class="period-summary-label" id="periodLabel">Últimos 7 dias</span>
+        <span class="period-summary-total" id="periodTotal">R$ 0,00</span>
+      </div>
+
+      <div class="section-title">Dia a dia</div>
+      <div class="earnings-list" id="earningsList"></div>
+      <div class="empty-state" id="earningsEmpty" style="display:none">
+        <div class="empty-icon" aria-hidden="true">&#x1f4b0;</div>
+        <h3>Sem ganhos no período</h3>
+        <p>Nenhum check-out concluído neste período.</p>
+      </div>
+    </div>
+
     <!-- Config -->
     <div id="panel-config" class="panel">
       <h2 class="config-title">Configuração de preços</h2>
@@ -457,6 +552,10 @@
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       <span>Histórico</span>
     </button>
+    <button class="nav-btn" data-tab="ganhos" onclick="switchTab('ganhos')" aria-label="Ganhos">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      <span>Ganhos</span>
+    </button>
     <button class="nav-btn" data-tab="config" onclick="switchTab('config')" aria-label="Configurações">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       <span>Config</span>
@@ -470,13 +569,15 @@
 
 <script type="module">
 import { getActiveCheckins, getRecentCheckouts, getTodayCheckins,
-         getSettings, updateSettings, completeCheckout } from './src/db.js'
+         getSettings, updateSettings, completeCheckout,
+         getCompletedInRange } from './src/db.js'
 import { requireAuth, signOut } from './src/auth.js'
 import { subscribeToCheckins } from './src/realtime.js'
 
 let _timer = null
 let _activeCheckins = []
 let _settings = { rateFirstHour: 10, rateSubsequent: 8, useSubsequentRate: true, showCost: true }
+let _currentPeriod = 'week'
 
 function fmtCurrency(v) { return 'R$ '+v.toFixed(2).replace('.',','); }
 function fmtTime(d) { return d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
@@ -526,6 +627,107 @@ window.switchTab = function(tab) {
   document.getElementById('panel-'+tab).classList.add('active')
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'))
   document.querySelector('[data-tab="'+tab+'"]').classList.add('active')
+  if (tab === 'ganhos') renderEarnings()
+}
+
+window.selectPeriod = function(period) {
+  _currentPeriod = period
+  document.getElementById('btnWeek').classList.toggle('active', period === 'week')
+  document.getElementById('btnMonth').classList.toggle('active', period === 'month')
+  renderEarnings()
+}
+
+function startOfDay(d) { const r = new Date(d); r.setHours(0,0,0,0); return r; }
+
+function dayKey(d) {
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+}
+
+function dayLabel(d) {
+  const today = startOfDay(new Date())
+  const target = startOfDay(d)
+  const diff = Math.round((today - target) / 86400000)
+  if (diff === 0) return 'Hoje'
+  if (diff === 1) return 'Ontem'
+  return d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })
+    .replace('.', '').replace(',', '')
+}
+
+async function renderEarnings() {
+  const now = new Date()
+  const todayStart = startOfDay(now)
+  const tomorrowStart = new Date(todayStart); tomorrowStart.setDate(tomorrowStart.getDate() + 1)
+
+  // today
+  const todayData = await getCompletedInRange(todayStart, tomorrowStart)
+  const todayTotal = todayData.reduce((s, r) => s + (r.amount || 0), 0)
+  document.getElementById('gainToday').textContent = fmtCurrency(todayTotal)
+  document.getElementById('gainTodayCount').textContent =
+    todayData.length + (todayData.length === 1 ? ' check-out realizado' : ' check-outs realizados')
+
+  // period range
+  let periodStart, days, periodLabelText
+  if (_currentPeriod === 'week') {
+    periodStart = new Date(todayStart); periodStart.setDate(periodStart.getDate() - 6)
+    days = 7; periodLabelText = 'Últimos 7 dias'
+  } else {
+    periodStart = new Date(now.getFullYear(), now.getMonth(), 1)
+    days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
+    periodLabelText = now.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+      .replace(/^\w/, c => c.toUpperCase())
+  }
+
+  const periodData = await getCompletedInRange(periodStart, tomorrowStart)
+
+  // group by day
+  const byDay = {}
+  periodData.forEach(r => {
+    const d = new Date(r.checkout_time)
+    const k = dayKey(d)
+    if (!byDay[k]) byDay[k] = { date: d, total: 0, count: 0 }
+    byDay[k].total += r.amount || 0
+    byDay[k].count++
+  })
+
+  // build sorted day list (most recent first)
+  const dayList = []
+  for (let i = 0; i < days; i++) {
+    const d = new Date(periodStart); d.setDate(d.getDate() + i)
+    if (d > now) break
+    const k = dayKey(d)
+    dayList.push({ date: new Date(d), key: k, total: byDay[k]?.total || 0, count: byDay[k]?.count || 0 })
+  }
+  dayList.reverse()
+
+  const periodTotal = dayList.reduce((s, d) => s + d.total, 0)
+  const maxDay = Math.max(...dayList.map(d => d.total), 0.01)
+
+  document.getElementById('periodLabel').textContent = periodLabelText
+  document.getElementById('periodTotal').textContent = fmtCurrency(periodTotal)
+
+  const list = document.getElementById('earningsList')
+  const empty = document.getElementById('earningsEmpty')
+
+  if (periodTotal === 0 && dayList.every(d => d.total === 0)) {
+    list.innerHTML = ''; empty.style.display = 'flex'
+  } else {
+    empty.style.display = 'none'
+    list.innerHTML = dayList.map(d => {
+      const pct = d.total > 0 ? Math.round((d.total / maxDay) * 100) : 0
+      const amtClass = d.total === 0 ? 'earnings-amount zero' : 'earnings-amount'
+      const amtText = d.total === 0 ? '—' : fmtCurrency(d.total)
+      const dateLabel = d.date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+      return '<div class="earnings-row">'+
+        '<div class="earnings-row-top">'+
+        '<div><div class="earnings-day">'+dayLabel(d.date)+'</div>'+
+        '<div class="earnings-day-sub">'+dateLabel+'</div></div>'+
+        '<div class="'+amtClass+'">'+amtText+'</div>'+
+        '</div>'+
+        '<div class="earnings-bar-track"><div class="earnings-bar-fill" style="width:'+pct+'%"></div></div>'+
+        (d.count > 0 ? '<div class="earnings-count">'+d.count+(d.count===1?' saída':' saídas')+'</div>' : '')+
+        '</div>'
+    }).join('')
+  }
 }
 
 window.refresh = async function() { await render(); showToast('Atualizado') }
