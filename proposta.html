@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: #1a1a2e;
+    background: #fff;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .page { max-width: 720px; margin: 0 auto; padding: 56px 48px; }
+
+  /* header */
+  .header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 40px; padding-bottom: 32px;
+    border-bottom: 2px solid #4361ee;
+  }
+  .logo { font-size: 26px; font-weight: 700; letter-spacing: -0.03em; }
+  .logo span { color: #4361ee; }
+  .header-meta { text-align: right; font-size: 12px; color: #666; line-height: 1.8; }
+  .header-meta strong { color: #1a1a2e; font-weight: 600; }
+
+  /* hero */
+  .hero {
+    background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+    border-radius: 16px; padding: 36px 40px; margin-bottom: 36px; color: #fff;
+  }
+  .hero h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 10px; }
+  .hero p { font-size: 15px; opacity: 0.88; max-width: 520px; line-height: 1.65; }
+
+  /* section */
+  h2 {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; color: #4361ee; margin-bottom: 14px; margin-top: 36px;
+  }
+  h2:first-of-type { margin-top: 0; }
+
+  p { margin-bottom: 12px; color: #333; }
+
+  /* feature grid */
+  .features {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px;
+  }
+  .feature-card {
+    border: 1px solid #e8eaf6; border-radius: 10px; padding: 14px 16px;
+    background: #f8f9ff;
+  }
+  .feature-card .f-title { font-weight: 600; font-size: 13px; margin-bottom: 3px; color: #1a1a2e; }
+  .feature-card .f-desc { font-size: 12px; color: #666; line-height: 1.5; }
+
+  /* pricing */
+  .pricing-box {
+    border: 2px solid #4361ee; border-radius: 14px; padding: 28px 32px; margin-bottom: 14px;
+    background: #f8f9ff;
+  }
+  .pricing-amount {
+    font-size: 44px; font-weight: 700; letter-spacing: -0.04em; color: #4361ee;
+    line-height: 1; margin-bottom: 4px;
+  }
+  .pricing-period { font-size: 14px; color: #666; margin-bottom: 18px; }
+  .pricing-includes { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+  .pricing-includes li { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #333; }
+  .pricing-includes li::before {
+    content: '✓'; color: #4361ee; font-weight: 700; flex-shrink: 0; font-size: 14px;
+  }
+
+  .addon-box {
+    border: 1px solid #e8eaf6; border-radius: 14px; padding: 22px 28px;
+    display: flex; justify-content: space-between; align-items: center; background: #fff;
+  }
+  .addon-amount { font-size: 28px; font-weight: 700; letter-spacing: -0.03em; color: #1a1a2e; }
+  .addon-label { font-size: 13px; color: #666; margin-top: 2px; }
+  .addon-right { text-align: right; }
+  .addon-examples { font-size: 12px; color: #888; margin-top: 3px; max-width: 260px; text-align: right; }
+
+  /* flow */
+  .flow { display: flex; gap: 0; margin: 4px 0 8px; }
+  .flow-step {
+    flex: 1; background: #f8f9ff; border: 1px solid #e8eaf6;
+    padding: 16px 14px; position: relative; text-align: center;
+  }
+  .flow-step:first-child { border-radius: 10px 0 0 10px; }
+  .flow-step:last-child { border-radius: 0 10px 10px 0; }
+  .flow-step:not(:last-child)::after {
+    content: '→'; position: absolute; right: -10px; top: 50%;
+    transform: translateY(-50%); color: #4361ee; font-weight: 700;
+    font-size: 16px; z-index: 1; background: #fff; padding: 0 2px;
+  }
+  .flow-step .f-num {
+    width: 24px; height: 24px; border-radius: 50%; background: #4361ee; color: #fff;
+    font-size: 12px; font-weight: 700; display: flex; align-items: center;
+    justify-content: center; margin: 0 auto 8px;
+  }
+  .flow-step .f-text { font-size: 11.5px; color: #444; line-height: 1.45; }
+
+  /* why */
+  .why-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .why-list li {
+    padding: 12px 16px; background: #f8f9ff; border-radius: 10px;
+    border-left: 3px solid #4361ee; font-size: 13px; color: #333;
+  }
+  .why-list li strong { color: #1a1a2e; }
+
+  /* cta */
+  .cta {
+    background: #1a1a2e; border-radius: 14px; padding: 30px 32px;
+    margin-top: 36px; color: #fff;
+  }
+  .cta h2 { color: #7c9cff; margin-top: 0; }
+  .cta-steps { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+  .cta-step { display: flex; align-items: flex-start; gap: 12px; font-size: 13px; }
+  .cta-step .num {
+    width: 22px; height: 22px; border-radius: 50%; background: #4361ee; color: #fff;
+    font-size: 11px; font-weight: 700; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0; margin-top: 1px;
+  }
+
+  /* footer */
+  .footer {
+    margin-top: 40px; padding-top: 24px; border-top: 1px solid #e8eaf6;
+    display: flex; justify-content: space-between; align-items: flex-end;
+    font-size: 12px; color: #888;
+  }
+  .footer strong { display: block; color: #1a1a2e; font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+
+  /* page break control */
+  .hero, .pricing-box, .addon-box, .cta, .footer,
+  .feature-card, .flow, .why-list li { break-inside: avoid; }
+  .features { break-inside: avoid; }
+  h2 { break-after: avoid; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="logo">Park<span>Check</span></div>
+    <div class="header-meta">
+      <strong>AtivaSys Sistemas</strong><br>
+      Jefferson Campelo · Analista de Sistemas<br>
+      (92) 99135-8237 · WhatsApp<br>
+      Maio de 2025
+    </div>
+  </div>
+
+  <div class="hero">
+    <h1>Controle o seu estacionamento de qualquer lugar</h1>
+    <p>O ParkCheck é um sistema simples de usar que roda direto no celular — sem instalar nada. Controle entradas, saídas e acompanhe seus ganhos em tempo real.</p>
+  </div>
+
+  <h2>O que está incluído</h2>
+  <div class="features">
+    <div class="feature-card">
+      <div class="f-title">Check-in rápido</div>
+      <div class="f-desc">Registre a entrada com placa, nome e telefone em menos de 30 segundos.</div>
+    </div>
+    <div class="feature-card">
+      <div class="f-title">Pátio em tempo real</div>
+      <div class="f-desc">Veja todos os carros no pátio, com tempo de permanência atualizado automaticamente.</div>
+    </div>
+    <div class="feature-card">
+      <div class="f-title">Cálculo automático</div>
+      <div class="f-desc">O valor a cobrar é calculado automaticamente na hora da saída, sem erro.</div>
+    </div>
+    <div class="feature-card">
+      <div class="f-title">Histórico completo</div>
+      <div class="f-desc">Registro de todas as saídas com horário e valor cobrado.</div>
+    </div>
+    <div class="feature-card">
+      <div class="f-title">Painel de ganhos</div>
+      <div class="f-desc">Acompanhe o faturamento do dia, da semana e do mês num só lugar.</div>
+    </div>
+    <div class="feature-card">
+      <div class="f-title">Preços flexíveis</div>
+      <div class="f-desc">Você define o valor da 1ª hora e das horas adicionais como quiser.</div>
+    </div>
+    <div class="feature-card">
+      <div class="f-title">Acesso pelo celular</div>
+      <div class="f-desc">Funciona em qualquer navegador. Não precisa baixar nem instalar nada.</div>
+    </div>
+    <div class="feature-card">
+      <div class="f-title">Dados na nuvem</div>
+      <div class="f-desc">Tudo salvo com segurança e acessível de qualquer dispositivo.</div>
+    </div>
+  </div>
+
+  <h2>Como funciona no dia a dia</h2>
+  <div class="flow">
+    <div class="flow-step">
+      <div class="f-num">1</div>
+      <div class="f-text">Cliente chega. Atendente faz o check-in no celular.</div>
+    </div>
+    <div class="flow-step">
+      <div class="f-num">2</div>
+      <div class="f-text">Sistema registra a entrada e conta o tempo automaticamente.</div>
+    </div>
+    <div class="flow-step">
+      <div class="f-num">3</div>
+      <div class="f-text">Cliente sai. Sistema mostra o valor exato a cobrar.</div>
+    </div>
+    <div class="flow-step">
+      <div class="f-num">4</div>
+      <div class="f-text">Gerente acompanha os ganhos do dia em tempo real.</div>
+    </div>
+  </div>
+
+  <h2>Investimento</h2>
+  <div class="pricing-box">
+    <div class="pricing-amount">R$ 50</div>
+    <div class="pricing-period">por mês · sem contrato · cancele quando quiser</div>
+    <ul class="pricing-includes">
+      <li>Acesso completo ao sistema para toda a equipe</li>
+      <li>Hospedagem e banco de dados em nuvem inclusos</li>
+      <li>Atualizações de segurança automáticas</li>
+      <li>Suporte por WhatsApp para dúvidas de uso</li>
+      <li>Sem taxa de adesão</li>
+    </ul>
+  </div>
+
+  <div class="addon-box">
+    <div>
+      <div class="addon-amount">R$ 150</div>
+      <div class="addon-label">por melhoria sob demanda</div>
+    </div>
+    <div class="addon-right">
+      <div class="addon-examples">Relatórios em PDF · Notificações por WhatsApp · Personalização visual · Outras funcionalidades</div>
+    </div>
+  </div>
+
+  <h2>Por que o ParkCheck?</h2>
+  <ul class="why-list">
+    <li><strong>Preço justo para quem está começando:</strong> sistemas do mercado cobram de R$ 150 a R$ 400/mês. Aqui são R$ 50.</li>
+    <li><strong>Sem complicação:</strong> se sabe usar o celular, sabe usar o ParkCheck. Sem treinamento complexo.</li>
+    <li><strong>Sem contrato de fidelidade:</strong> use enquanto faz sentido para o seu negócio.</li>
+    <li><strong>Suporte direto:</strong> fala comigo pelo WhatsApp, sem chamado, sem fila.</li>
+    <li><strong>Cresce com você:</strong> quando o negócio crescer, o sistema cresce junto.</li>
+  </ul>
+
+  <div class="cta">
+    <h2>Próximos passos</h2>
+    <div class="cta-steps">
+      <div class="cta-step"><div class="num">1</div><span>Quer ver funcionando? Posso fazer uma demonstração ao vivo pelo celular.</span></div>
+      <div class="cta-step"><div class="num">2</div><span>Gostou? É só combinar e o sistema já entra no ar em menos de 24h.</span></div>
+      <div class="cta-step"><div class="num">3</div><span>Tem dúvida? Me chama no WhatsApp — sem compromisso.</span></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>
+      <strong>AtivaSys Sistemas · Jefferson Campelo</strong>
+      Analista de Sistemas · (92) 99135-8237 · WhatsApp
+    </div>
+    <div>Proposta válida por 30 dias · Maio de 2025</div>
+  </div>
+
+</div>
+</body>
+</html>

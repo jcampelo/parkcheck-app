@@ -111,3 +111,19 @@ export async function updateSettings({ rateFirstHour, rateSubsequent, useSubsequ
     .eq('id', 1)
   if (error) throw error
 }
+
+export async function deleteCheckin(id) {
+  const { error } = await supabase
+    .from('check_ins')
+    .delete()
+    .eq('id', id)
+  if (error) throw error
+}
+
+export async function deleteAllCheckins() {
+  const { error } = await supabase
+    .from('check_ins')
+    .delete()
+    .not('id', 'is', null)
+  if (error) throw error
+}

@@ -5,3 +5,8 @@ dist/
 .vercel
 .claude/
 open-chrome.js
+manual.html
+qrcode-data.txt
+qrcode.txt
+ONBOARDING.md
+*.pdf
